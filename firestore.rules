@@ -1,0 +1,97 @@
+rules_version = '2';
+
+// ============================================================
+//  Firestore Security Rules - منصة ملخصات حاسبات وادي النيل
+//  انسخ الملف ده كله والصقه في:
+//  Firebase Console -> Firestore Database -> Rules -> Publish
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function isAdmin() {
+      return signedIn() && exists(userDoc()) && get(userDoc()).data.role == "admin";
+    }
+
+    function validSubject(id) {
+      return id in ["sub1", "sub2", "sub3", "sub4", "sub5", "sub6"];
+    }
+
+    function validUrl(u) {
+      return u is string && u.size() <= 2000 && u.matches("https?://.+");
+    }
+
+    function validOptionalString(data, fieldName, maxLen) {
+      return !(fieldName in data) || (data[fieldName] is string && data[fieldName].size() <= maxLen);
+    }
+
+    // ---------- Users ----------
+    // كل طالب يقرأ ملفه، والأدمن يقرأ الجميع للإحصائيات وعرض قائمة الطلاب
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      // إنشاء الحساب: لازم يكون ملفه هو، ودوره "student" فقط لمنع تزوير الصلاحيات
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(["name", "email", "level", "role", "createdAt"])
+        && request.resource.data.role == "student"
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60;
+
+      // التعديل: الطالب يعدّل بياناته الشخصية دون المساس بـ role أو email
+      // الأدمن يمكنه تعديل الصلاحيات وتحديث البيانات
+      allow update: if isAdmin()
+        || (signedIn()
+            && request.auth.uid == uid
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["role", "email"]));
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Summaries ----------
+    match /summaries/{id} {
+      // أي طالب مسجّل دخول يمكنه تصفح وبحث الملخصات
+      allow read: if signedIn();
+
+      // الإضافة والتعديل والحذف للأدمن فقط مع فحص دقيق للبيانات
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(["title", "subjectId", "url", "imageUrl", "description", "category", "createdAt", "createdBy", "createdByName"])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 150
+        && validSubject(request.resource.data.subjectId)
+        && validUrl(request.resource.data.url)
+        && validOptionalString(request.resource.data, "description", 1000)
+        && validOptionalString(request.resource.data, "imageUrl", 2000)
+        && validOptionalString(request.resource.data, "category", 60)
+        && request.resource.data.createdBy == request.auth.uid;
+
+      allow update: if isAdmin()
+        && request.resource.data.keys().hasOnly(["title", "subjectId", "url", "imageUrl", "description", "category", "createdAt", "createdBy", "createdByName", "updatedAt"])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 150
+        && validSubject(request.resource.data.subjectId)
+        && validUrl(request.resource.data.url)
+        && validOptionalString(request.resource.data, "description", 1000)
+        && validOptionalString(request.resource.data, "imageUrl", 2000)
+        && validOptionalString(request.resource.data, "category", 60);
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- حظر الوصول لأي مجموعة أخرى غير معرفة ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f19" />
+  <title>تسجيل الدخول | منصة ملخصات حاسبات وذكاء اصطناعي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css?v=8.0" />
+  <link rel="stylesheet" href="css/auth.css?v=8.0" />
+  <style>
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    .forgot-link {
+      color: #94a3b8;
+      transition: color 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .forgot-link:hover {
+      color: var(--primary, #d4af37);
+      text-decoration: underline;
+    }
+    /* Modal Reset Password */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+      text-align: right;
+      position: relative;
+    }
+    .modal-box h3 {
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .modal-box p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .modal-close:hover {
+      color: #fff;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <img src="img/robot_logo.jpg" class="bg-watermark" alt="شعار الجامعة" />
+
+  <div class="shapes">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="card" id="card">
+    <div class="logo">
+      <img src="img/robot_logo.jpg" alt="شعار الكلية" style="width: 100%; height: 100%; object-fit: contain;" />
+    </div>
+    <p class="brand">
+      منصة ملخصات كلية الحاسبات والذكاء الاصطناعي
+      <small>جامعة وادي النيل</small>
+    </p>
+    <h1>مرحباً بك 👋</h1>
+    <p class="subtitle">سجّل دخولك للوصول إلى بنك الملخصات والمواد الدراسية</p>
+
+    <form id="loginForm" novalidate>
+      <div class="field fade-item" id="identifierField">
+        <input type="text" id="identifier" placeholder=" " autocomplete="username" dir="ltr" required />
+        <label for="identifier">رقم الهاتف أو البريد الإلكتروني</label>
+      </div>
+
+      <div class="field fade-item" id="passField">
+        <input type="password" id="password" placeholder=" " autocomplete="current-password" required />
+        <label for="password">كلمة المرور</label>
+        <button type="button" class="toggle-password" id="togglePass" aria-label="إظهار كلمة المرور">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="options-row fade-item">
+        <label style="color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="remember" checked style="width: auto; box-shadow: none;" /> تذكرني
+        </label>
+        <a href="javascript:void(0)" id="forgotPassBtn" class="forgot-link">نسيت كلمة المرور؟</a>
+      </div>
+
+      <button type="submit" class="btn fade-item" id="submitBtn">
+        <span class="text">تسجيل الدخول</span>
+        <span class="spinner"></span>
+        <svg class="checkmark" viewBox="0 0 26 26"><path d="M5 13l5 5 11-11"/></svg>
+      </button>
+
+      <p class="message fade-item" id="message"></p>
+    </form>
+
+    <p class="switch">
+      ليس لديك حساب بعد؟ <a href="register.html">إنشاء حساب جديد</a>
+    </p>
+  </div>
+
+  <!-- Modal استعادة كلمة المرور -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeResetModal" aria-label="إغلاق">&times;</button>
+      <h3>🔑 استعادة كلمة المرور</h3>
+      <p>أدخل رقم الهاتف أو البريد الإلكتروني المسجّل به حسابك وسنرسل لك رابط إعادة تعيين كلمة المرور.</p>
+      
+      <div class="field" id="resetField" style="margin-bottom: 20px;">
+        <input type="text" id="resetInput" placeholder=" " dir="ltr" />
+        <label for="resetInput">رقم الهاتف أو البريد</label>
+      </div>
+
+      <button type="button" class="btn" id="sendResetBtn" style="min-height: 48px;">
+        <span class="text">إرسال رابط الاستعادة</span>
+        <span class="spinner"></span>
+      </button>
+      <p class="message" id="resetMsg" style="margin-top: 12px;"></p>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/auth-ui.js"></script>
+  <script>
+    const form = document.getElementById("loginForm");
+    const card = document.getElementById("card");
+    const btn = document.getElementById("submitBtn");
+    const msg = document.getElementById("message");
+    const identifier = document.getElementById("identifier");
+    const password = document.getElementById("password");
+    const idField = document.getElementById("identifierField");
+    const passField = document.getElementById("passField");
+    const remember = document.getElementById("remember");
+
+    // Modal elements
+    const forgotBtn = document.getElementById("forgotPassBtn");
+    const resetModal = document.getElementById("resetModal");
+    const closeResetModal = document.getElementById("closeResetModal");
+    const resetInput = document.getElementById("resetInput");
+    const sendResetBtn = document.getElementById("sendResetBtn");
+    const resetMsg = document.getElementById("resetMsg");
+
+    redirectIfLoggedIn();
+    setupPasswordToggle(document.getElementById("togglePass"), password);
+    addRipple(btn);
+    clearErrorsOnInput(form, msg);
+
+    // استنتاج البريد الإلكتروني (يدعم الهاتف أو الإيميل المباشر)
+    function resolveEmail(val) {
+      const trimmed = val.trim();
+      if (trimmed.includes("@")) {
+        return trimmed;
+      }
+      const cleanedPhone = sanitizePhone(trimmed);
+      return cleanedPhone + "@cs-nvu.edu.eg";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.className = "message";
+      msg.textContent = "";
+
+      const inputVal = identifier.value.trim();
+      let hasErr = false;
+
+      if (!inputVal) {
+        showFormError(card, msg, "يرجى إدخال رقم الهاتف أو البريد الإلكتروني", idField);
+        hasErr = true;
+      }
+      if (!password.value) {
+        if (!hasErr) showFormError(card, msg, "يرجى إدخال كلمة المرور", passField);
+        hasErr = true;
+      }
+      if (hasErr) return;
+
+      const finalEmail = resolveEmail(inputVal);
+
+      setBtnState(btn, "loading");
+      try {
+        const P = firebase.auth.Auth.Persistence;
+        await auth.setPersistence(remember.checked ? P.LOCAL : P.SESSION);
+        await auth.signInWithEmailAndPassword(finalEmail, password.value);
+
+        setBtnState(btn, "success");
+        showFormSuccess(msg, "تم تسجيل الدخول بنجاح! جاري التحويل...");
+        setTimeout(() => location.replace("index.html"), 600);
+      } catch (err) {
+        setBtnState(btn, "idle");
+        if (
+          err.code === "auth/user-not-found" ||
+          err.code === "auth/wrong-password" ||
+          err.code === "auth/invalid-credential" ||
+          err.code === "auth/invalid-login-credentials"
+        ) {
+          showFormError(card, msg, "بيانات الدخول غير صحيحة، تأكد من الرقم وكلمة المرور", idField);
+        } else {
+          showFormError(card, msg, authErrorMessage(err));
+        }
+      }
+    });
+
+    // استعادة كلمة المرور
+    forgotBtn.addEventListener("click", () => {
+      resetModal.classList.add("active");
+      resetInput.value = identifier.value.trim();
+      resetMsg.textContent = "";
+      setTimeout(() => resetInput.focus(), 100);
+    });
+
+    closeResetModal.addEventListener("click", () => {
+      resetModal.classList.remove("active");
+    });
+
+    resetModal.addEventListener("click", (e) => {
+      if (e.target === resetModal) resetModal.classList.remove("active");
+    });
+
+    sendResetBtn.addEventListener("click", async () => {
+      const val = resetInput.value.trim();
+      if (!val) {
+        resetMsg.className = "message";
+        resetMsg.textContent = "يرجى إدخال رقم الهاتف أو البريد المسجل";
+        return;
+      }
+      const email = resolveEmail(val);
+      setBtnState(sendResetBtn, "loading");
+      resetMsg.className = "message";
+      resetMsg.textContent = "";
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        setBtnState(sendResetBtn, "idle");
+        resetMsg.className = "message ok";
+        resetMsg.textContent = "تم إرسال رابط إعادة تعيين كلمة المرور إلى البريد المرتبط بحسابك!";
+      } catch (err) {
+        setBtnState(sendResetBtn, "idle");
+        if (err.code === "auth/user-not-found") {
+          resetMsg.textContent = "لا يوجد حساب مسجل بهذه البيانات";
+        } else {
+          resetMsg.textContent = authErrorMessage(err);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

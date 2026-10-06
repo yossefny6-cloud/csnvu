@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f19" />
+  <title>إنشاء حساب جديد | منصة ملخصات حاسبات وذكاء اصطناعي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css?v=8.0" />
+  <link rel="stylesheet" href="css/auth.css?v=8.0" />
+  <style>
+    .field select {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <img src="img/robot_logo.jpg" class="bg-watermark" alt="شعار الجامعة" />
+
+  <div class="shapes">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="card" id="card">
+    <a href="login.html" class="back-btn" title="العودة لتسجيل الدخول">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+    <div class="logo">
+      <img src="img/robot_logo.jpg" alt="شعار الكلية" style="width: 100%; height: 100%; object-fit: contain;" />
+    </div>
+    <h1>إنشاء حساب جديد ✨</h1>
+    <p class="subtitle">انضم لزملائك في الكلية واستفد من جميع الملخصات الدراسية</p>
+
+    <form id="registerForm" novalidate>
+      <div class="field fade-item" id="nameField">
+        <input type="text" id="name" placeholder=" " autocomplete="name" maxlength="50" required />
+        <label for="name">الاسم ثلاثي أو رباعي</label>
+      </div>
+
+      <div class="field fade-item" id="phoneField">
+        <input type="tel" id="phone" placeholder=" " autocomplete="tel" dir="ltr" required />
+        <label for="phone">رقم الهاتف (واتساب)</label>
+      </div>
+
+      <div class="field fade-item" id="levelField">
+        <select id="level" required>
+          <option value="" disabled selected></option>
+          <option value="1">الفرقة الأولى (إعدادي / سنة أولى)</option>
+          <option value="2">الفرقة الثانية</option>
+          <option value="3">الفرقة الثالثة</option>
+          <option value="4">الفرقة الرابعة (تخرج)</option>
+        </select>
+        <label for="level">الفرقة الدراسية</label>
+        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </div>
+
+      <div class="field fade-item" id="passField">
+        <input type="password" id="password" placeholder=" " autocomplete="new-password" required />
+        <label for="password">كلمة المرور (6 أحرف أو أرقام على الأقل)</label>
+        <button type="button" class="toggle-password" id="togglePass" aria-label="إظهار كلمة المرور">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="field fade-item" id="confirmField">
+        <input type="password" id="confirm" placeholder=" " autocomplete="new-password" required />
+        <label for="confirm">تأكيد كلمة المرور</label>
+        <button type="button" class="toggle-password" id="toggleConfirm" aria-label="إظهار تأكيد كلمة المرور">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <button type="submit" class="btn fade-item" id="submitBtn">
+        <span class="text">إنشاء الحساب</span>
+        <span class="spinner"></span>
+        <svg class="checkmark" viewBox="0 0 26 26"><path d="M5 13l5 5 11-11"/></svg>
+      </button>
+
+      <p class="message fade-item" id="message"></p>
+    </form>
+
+    <p class="switch">
+      لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a>
+    </p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/auth-ui.js"></script>
+  <script>
+    const form = document.getElementById("registerForm");
+    const card = document.getElementById("card");
+    const btn = document.getElementById("submitBtn");
+    const msg = document.getElementById("message");
+    const $ = (id) => document.getElementById(id);
+
+    redirectIfLoggedIn();
+    setupPasswordToggle($("togglePass"), $("password"));
+    setupPasswordToggle($("toggleConfirm"), $("confirm"));
+    addRipple(btn);
+    clearErrorsOnInput(form, msg);
+
+    $("level").addEventListener("change", () => {
+      $("levelField").classList.remove("error");
+      const err = $("levelField").querySelector(".field-error-text");
+      if (err) err.textContent = "";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.className = "message";
+      msg.textContent = "";
+
+      const name = $("name").value.trim();
+      const rawPhone = $("phone").value.trim();
+      const phone = sanitizePhone(rawPhone);
+      const level = $("level").value;
+      const pass = $("password").value;
+      const conf = $("confirm").value;
+
+      let hasErr = false;
+
+      if (!name || name.length < 3) {
+        showFormError(card, msg, "يرجى كتابة الاسم بشكل صحيح (3 أحرف على الأقل)", $("nameField"));
+        hasErr = true;
+      }
+      if (!phone || phone.length < 8) {
+        if (!hasErr) showFormError(card, msg, "يرجى إدخال رقم هاتف صحيح", $("phoneField"));
+        hasErr = true;
+      }
+      if (!level) {
+        if (!hasErr) showFormError(card, msg, "يرجى اختيار الفرقة الدراسية", $("levelField"));
+        hasErr = true;
+      }
+      if (!pass || pass.length < 6) {
+        if (!hasErr) showFormError(card, msg, "كلمة المرور يجب ألا تقل عن 6 أحرف أو أرقام", $("passField"));
+        hasErr = true;
+      }
+      if (pass !== conf) {
+        if (!hasErr) showFormError(card, msg, "كلمتا المرور غير متطابقتين", $("confirmField"));
+        hasErr = true;
+      }
+      if (hasErr) return;
+
+      const finalEmail = phone + "@cs-nvu.edu.eg";
+
+      setBtnState(btn, "loading");
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(finalEmail, pass);
+        await cred.user.updateProfile({ displayName: name });
+        
+        // حفظ ملف الطالب في Firestore
+        await db.collection("users").doc(cred.user.uid).set({
+          name: name,
+          email: finalEmail,
+          level: level,
+          role: "student",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        setBtnState(btn, "success");
+        showFormSuccess(msg, "تم إنشاء الحساب بنجاح! جاري تحويلك للمنصة...");
+        setTimeout(() => location.replace("index.html"), 700);
+      } catch (err) {
+        setBtnState(btn, "idle");
+        if (err.code === "auth/email-already-in-use") {
+          showFormError(card, msg, "رقم الهاتف مسجل بالفعل مسبقاً، يمكنك تسجيل الدخول مباشرة", $("phoneField"));
+        } else {
+          showFormError(card, msg, authErrorMessage(err));
+        }
+      }
+    });
+  </script>
+</body>
+</html>

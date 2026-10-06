@@ -1,0 +1,21 @@
+{
+  "name": "shutter",
+  "short_name": "shutter",
+  "description": "المنصة الرسمية لملخصات كلية الحاسبات والذكاء الاصطناعي - جامعة وادي النيل.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e90ff",
+  "icons": [
+    {
+      "src": "img/robot_logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "img/robot_logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

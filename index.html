@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#182a4d" />
+  <meta name="description" content="المنصة الرسمية لملخصات كلية الحاسبات والذكاء الاصطناعي - جامعة وادي النيل. بنك متكامل للمحاضرات والسكاشن والمراجعات." />
+  <meta property="og:title" content="كلية الحاسبات والذكاء الاصطناعي | منصة الملخصات" />
+  <meta property="og:description" content="أكبر منصة لتبادل وتصفح ملخصات ومواد كلية الحاسبات والذكاء الاصطناعي." />
+  <meta property="og:image" content="img/robot_logo.jpg" />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1e90ff" />
+  <link rel="apple-touch-icon" href="img/robot_logo.jpg" />
+  <title>ملخصات حاسبات والذكاء الاصطناعي | جامعة وادي النيل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css?v=5.0" />
+  <link rel="stylesheet" href="css/app.css?v=5.0" />
+  <style>
+    /* Theme Dropdown */
+    .theme-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .theme-dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--card);
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      z-index: 100;
+      border: 1px solid var(--border);
+    }
+    .theme-dropdown.open .theme-dropdown-content,
+    .theme-dropdown:hover .theme-dropdown-content {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(5px);
+    }
+    .current-theme-icon {
+      background: transparent !important;
+      border: none !important;
+      font-size: 1.4rem;
+      box-shadow: none !important;
+      width: auto;
+      height: auto;
+      padding: 0 !important;
+      cursor: pointer;
+    }
+    .user-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 4px 14px 4px 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .breadcrumb-nav a {
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .breadcrumb-nav a:hover {
+      color: var(--primary);
+    }
+    .summary-actions-grid {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .category-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: rgba(30, 58, 138, 0.08);
+      color: var(--primary);
+      border: 1px solid rgba(30, 58, 138, 0.15);
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    [data-theme="dark"] .category-tag {
+      background: rgba(212, 175, 55, 0.15);
+      color: #d4af37;
+      border-color: rgba(212, 175, 55, 0.3);
+    }
+    [data-theme="pink"] .category-tag {
+      background: rgba(216, 27, 96, 0.12);
+      color: #d81b60;
+      border-color: rgba(216, 27, 96, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة التحميل الأولية -->
+  <div class="page-loader" id="pageLoader">
+    <div class="loader-ring"></div>
+  </div>
+
+  <!-- خلفية الأورورا وشعار الجامعة الشفاف -->
+  <div class="aurora-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <img src="img/robot_logo.jpg" class="bg-watermark" alt="شعار المنصة" />
+
+  <!-- شريط التنقل العلوي Navbar -->
+  <header class="navbar">
+    <a class="nav-brand" href="index.html">
+      <span class="nav-logo" id="navLogoIcon">
+        <img src="img/robot_logo.jpg" alt="شعار" style="width: 100%; height: 100%; object-fit: contain;" />
+      </span>
+      <div style="display: flex; flex-direction: column;">
+        <strong>كلية الحاسبات والذكاء الاصطناعي</strong>
+        <span id="greetingText" style="font-size: 0.78rem; color: var(--muted); font-weight: normal;"></span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <!-- بيانات الطالب المسجّل -->
+      <div class="user-chip" id="userChip">
+        <span class="user-avatar" id="userAvatar">ط</span>
+        <div class="nav-user-details">
+          <span class="nav-user-name" id="userName">طالب</span>
+          <span class="nav-user-badge" id="userRole">الفرقة الأولى</span>
+        </div>
+      </div>
+
+      <!-- قائمة المظهر / الثيم -->
+      <div class="theme-dropdown" id="themeDropdown" onmouseleave="restoreTheme()">
+        <button class="theme-btn current-theme-icon" id="themeToggleBtn" title="تغيير المظهر">🎨</button>
+        <div class="theme-dropdown-content">
+          <button class="theme-btn theme-navy" onmouseenter="previewTheme('navy')" onclick="setTheme('navy')" title="اللون الكحلي الملكي"></button>
+          <button class="theme-btn theme-dark" onmouseenter="previewTheme('dark')" onclick="setTheme('dark')" title="الوضع الليلي الذهبي"></button>
+          <button class="theme-btn theme-cyber" onmouseenter="previewTheme('cyber')" onclick="setTheme('cyber')" title="وضع السايبر (أسود وسيان)"></button>
+          <button class="theme-btn theme-pink" onmouseenter="previewTheme('pink')" onclick="setTheme('pink')" title="الوضع الوردي الأنيق"></button>
+        </div>
+      </div>
+
+      <!-- زر لوحة التحكم للأدمن فقط -->
+      <a href="admin.html" class="nav-btn admin-only" id="adminBtn" style="display: none;">⚙️ لوحة التحكم</a>
+
+      <!-- زر تثبيت التطبيق PWA -->
+      <button class="nav-btn" id="installAppBtn" style="display: none; background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">📱 تثبيت التطبيق</button>
+      
+      <!-- زر تسجيل الخروج -->
+      <button class="nav-btn ghost" id="logoutBtn">تسجيل خروج</button>
+    </div>
+  </header>
+
+  <!-- الواجهة العلوية الفخمة (Hero Section) -->
+  <section class="hero-glass" id="heroSection">
+    <div class="hero-badge">
+      <span>🎓</span>
+      <span>المنصة الطلابية الرسمية — جامعة وادي النيل</span>
+    </div>
+    <h1 class="hero-title">بنك ملخصات الحاسبات والذكاء الاصطناعي</h1>
+    <p class="hero-subtitle">
+      كل المحاضرات، السكاشن، الشيتات، والمراجعات النهائية للدفعة في مكان واحد موثق ومنظم 🚀
+    </p>
+
+    <!-- شريط البحث الموحد والشامل (Global Search) -->
+    <div class="search-wrapper">
+      <div class="search-box-unified">
+        <input type="text" id="globalSearchInput" placeholder="ابحث في جميع المواد عن أي ملخص، محاضرة، شيت..." autocomplete="off" />
+        <svg class="search-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <span class="search-shortcut">Ctrl + K</span>
+      </div>
+
+      <!-- قائمة نتائج البحث الفورية -->
+      <div class="search-dropdown" id="searchDropdown">
+        <div class="search-dropdown-header">
+          <span>نتائج البحث المباشرة</span>
+          <span id="searchResultCount">0 نتائج</span>
+        </div>
+        <div id="searchDropdownList"></div>
+      </div>
+    </div>
+
+    <!-- التبويبات السريعة الرئيسية -->
+    <div class="home-nav-tabs">
+      <button class="home-tab-btn active" id="tabSubjectsBtn" onclick="switchHomeTab('subjects')">
+        📚 المواد الدراسية
+      </button>
+      <button class="home-tab-btn" id="tabSavedBtn" onclick="switchHomeTab('saved')">
+        ⭐ المحفوظات (<span id="savedCount">0</span>)
+      </button>
+      <button class="home-tab-btn" id="tabRecentBtn" onclick="switchHomeTab('recent')">
+        🔥 أحدث الإضافات
+      </button>
+    </div>
+  </section>
+
+  <!-- الحاوية الرئيسية للمحتوى -->
+  <main class="container">
+
+    <!-- العرض 1: شبكة المواد الدراسية -->
+    <div id="subjectsView">
+      <div class="section-header" style="margin-top: 10px;">
+        <h2>المواد الدراسية المقررة</h2>
+        <p>اختر المادة لتصفح كافة الملخصات والمحاضرات والامتحانات التابعة لها</p>
+      </div>
+      <div class="subjects-grid" id="subjectsGrid">
+        <!-- يتم رسم كروت المواد هنا برمجياً -->
+      </div>
+    </div>
+
+    <!-- العرض 2: قسم المحفوظات (المفضلة) -->
+    <div id="savedView" style="display: none;">
+      <div class="section-header" style="margin-top: 10px;">
+        <h2>⭐ ملخصاتي المحفوظة</h2>
+        <p>جميع المذكرات والملخصات التي قمت بتمييزها للرجوع إليها قبل الامتحانات</p>
+      </div>
+      <div class="summaries-grid" id="savedList">
+        <!-- يتم عرض الملخصات المحفوظة هنا -->
+      </div>
+    </div>
+
+    <!-- العرض 3: قسم أحدث الإضافات -->
+    <div id="recentView" style="display: none;">
+      <div class="section-header" style="margin-top: 10px;">
+        <h2>🔥 أحدث الملخصات المضافة مؤخراً</h2>
+        <p>آخر ما تم رفعه ونشره من قبل الدفعة والمسؤولين</p>
+      </div>
+      <div class="summaries-grid" id="recentList">
+        <!-- يتم عرض أحدث الملخصات هنا -->
+      </div>
+    </div>
+
+    <!-- العرض 4: قائمة ملخصات مادة معينة -->
+    <div id="summariesView" style="display: none;">
+      <div class="breadcrumb-nav">
+        <a onclick="closeSubjectBtn()">الرئيسية</a>
+        <span>←</span>
+        <span id="breadcrumbSubjectTitle">المادة</span>
+      </div>
+
+      <div class="view-header" style="flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h2 id="currentSubjectTitle" style="margin-bottom: 4px;">اسم المادة</h2>
+            <span id="currentSubjectCount" style="color: var(--muted); font-size: 0.9rem;">0 ملخص منشور</span>
+          </div>
+          <button class="enter-btn ghost-btn" style="width: auto; padding: 8px 24px; border-radius: 10px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;" onclick="closeSubjectBtn()" title="رجوع للمواد">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            رجوع للمواد
+          </button>
+        </div>
+
+        <!-- فلاتر التصنيف الفرعية -->
+        <div class="filter-pills-bar" id="categoryPills">
+          <button class="filter-pill active" onclick="filterByCategory('all', this)">كل المحتوى</button>
+          <button class="filter-pill" onclick="filterByCategory('ملخص', this)">📑 ملخصات شاملة</button>
+          <button class="filter-pill" onclick="filterByCategory('محاضرة', this)">👨‍🏫 محاضرات وسلايدات</button>
+          <button class="filter-pill" onclick="filterByCategory('شيت', this)">📝 شيتات وتكليفات</button>
+          <button class="filter-pill" onclick="filterByCategory('امتحان', this)">🎯 امتحانات سابقة</button>
+        </div>
+      </div>
+
+      <div class="search-box" style="margin-bottom: 24px;">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="ابحث في ملخصات هذه المادة بالتحديد..." />
+      </div>
+
+      <div id="summariesState" class="empty"></div>
+      <div class="summaries-grid" id="summariesList"></div>
+    </div>
+
+  </main>
+
+  <!-- مشغل PDF الداخلي (In-App PDF Reader Modal) -->
+  <div class="pdf-modal-overlay" id="pdfModal">
+    <div class="pdf-modal-container">
+      <div class="pdf-modal-header">
+        <div class="pdf-modal-title">
+          <span>📄</span>
+          <span id="pdfModalTitleText">معاينة الملخص</span>
+        </div>
+        <div class="pdf-modal-controls">
+          <a class="pdf-control-btn" id="pdfDownloadBtn" href="#" target="_blank" download title="تحميل الملف">
+            📥 تحميل
+          </a>
+          <a class="pdf-control-btn" id="pdfExternalBtn" href="#" target="_blank" rel="noopener noreferrer" title="فتح في تبويب مستقل">
+            ↗️ نافذة خارجية
+          </a>
+          <button class="pdf-control-btn close" id="pdfCloseBtn" onclick="closePdfModal()" title="إغلاق المعاينة">
+            ✕ إغلاق
+          </button>
+        </div>
+      </div>
+      <div class="pdf-modal-body">
+        <div class="pdf-modal-loader" id="pdfLoader">
+          <div class="loader-ring"></div>
+          <span style="color: var(--muted); font-size: 0.95rem;">جاري تحميل المستند...</span>
+        </div>
+        <iframe class="pdf-modal-iframe" id="pdfFrame" src="" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- تذييل الصفحة Footer -->
+  <footer style="text-align: center; padding: 32px 16px; margin-top: 60px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+    <p>تم التطوير بكل ❤️ لطلاب <strong>كلية الحاسبات والذكاء الاصطناعي</strong><br><span style="font-size: 0.9em; opacity: 0.9;">بواسطة المطور <strong>shutter</strong></span></p>
+    
+    <a href="https://wa.me/message/5WMG3I6Z3RH7B1" id="whatsappContactBtn" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background-color: #25D366; color: white; padding: 10px 22px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(37, 211, 102, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37, 211, 102, 0.3)';">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+      </svg>
+      تواصل معي على واتساب
+    </a>
+    
+    <p style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">المنصة الذكية &copy; 2026 — دفعة المستقبل</p>
+  </footer>
+
+  <!-- الأزرار العائمة Floating Actions -->
+  <!-- AI Chat Widget -->
+  <div class="chat-widget" id="aiChatWidget">
+    <div class="chat-header" onclick="toggleChatWidget()">
+      <div class="chat-header-info">
+        <span class="chat-avatar">🤖</span>
+        <div>
+          <h4>المساعد الذكي (AI)</h4>
+          <span class="chat-status">متصل ومدرب للمساعدة</span>
+        </div>
+      </div>
+      <button class="chat-close-btn" title="تصغير">✕</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-footer">
+      <input type="text" id="chatInput" placeholder="اسألني أي سؤال في المنهج..." autocomplete="off" />
+      <button class="chat-send-btn" onclick="sendChatMessage()" title="إرسال">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <button class="chat-fab" id="chatFabBtn" onclick="toggleChatWidget()" title="تحدث مع المساعد الذكي">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  </button>
+
+  <button id="floatingBackBtn" class="floating-back-btn" onclick="closeSubjectBtn()" title="رجوع للمواد">
+    <svg class="progress-ring" width="60" height="60">
+      <circle class="progress-ring__circle" stroke="var(--primary)" stroke-width="3" fill="transparent" r="28" cx="30" cy="30"/>
+    </svg>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7"/>
+    </svg>
+  </button>
+
+  <a href="admin.html" id="adminFab" class="admin-fab admin-only" style="display: none;" title="إضافة ملخص جديد">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </a>
+
+  <!-- مكتبات Firebase والسكريبتات الأساسية -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/subjects.js"></script>
+  <script src="js/chat.js?v=2.7"></script>
+
+  <script>
+    let currentProfile = null;
+    let currentSubjectId = null;
+    let currentCategoryFilter = "all";
+    let subjectSummaries = [];
+    let allSummariesCache = []; // كاش لكل الملخصات لسرعة البحث الشامل
+    let subjectCountsMap = {};
+
+    // 1. بدء تشغيل الصفحة والتحقق من المستخدم
+    requireAuth().then(async ({ user, profile }) => {
+      currentProfile = profile;
+      hidePageLoader();
+
+      if (profile) {
+        fillNavbar(profile);
+        initGreeting(profile.name);
+      } else {
+        initGreeting("");
+      }
+
+      updateSavedCountBadge();
+      renderSubjects();
+      await fetchAllSummariesAndCounts();
+
+      // فتح مادة مباشرة إذا كان الرابط يحتوي على Hash (مثل index.html#sub1)
+      const hashId = location.hash.substring(1);
+      if (hashId && SUBJECTS.some(s => s.id === hashId)) {
+        openSubject(hashId, false);
+      }
+    });
+
+    // تحية شخصية متحركة بالاسم
+    function initGreeting(name) {
+      const h = new Date().getHours();
+      const timeGreeting = h < 12 ? "صباح الخير" : (h < 18 ? "مساء الخير" : "مساء النور");
+      const firstName = name ? name.trim().split(" ")[0] : "يا مهندس";
+      const fullText = `${timeGreeting} يا بشمهندس ${firstName}! 👋`;
+
+      const el = document.getElementById("greetingText");
+      el.textContent = "";
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i < fullText.length) {
+          el.textContent += fullText.charAt(i);
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, 65);
+    }
+
+    // 2. جلب كل الملخصات دفعة واحدة للبحث الشامل وأحدث الإضافات
+    async function fetchAllSummariesAndCounts() {
+      try {
+        const snap = await db.collection("summaries").get();
+        allSummariesCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // حساب عدد ملخصات كل مادة
+        subjectCountsMap = {};
+        allSummariesCache.forEach(s => {
+          subjectCountsMap[s.subjectId] = (subjectCountsMap[s.subjectId] || 0) + 1;
+        });
+
+        // تحديث أعداد المواد في الكروت
+        renderSubjects();
+      } catch (e) {
+        console.warn("Could not pre-fetch summaries cache:", e);
+      }
+    }
+
+    // 3. رسم كروت المواد الست في الصفحة الرئيسية
+    function renderSubjects() {
+      const grid = document.getElementById("subjectsGrid");
+      grid.innerHTML = SUBJECTS.map((s, i) => {
+        const count = subjectCountsMap[s.id] || 0;
+        const countText = count > 0 ? `${count} ملخص متاح` : "قريباً";
+        return `
+          <div class="subject-card" style="--c:${s.color}; --c-soft:${s.color}22; animation-delay:${i * 0.08}s" onclick="openSubject('${s.id}')">
+            <div class="subject-cover">
+              <span class="icon">${s.icon}</span>
+            </div>
+            <div class="subject-info">
+              <span class="subject-count-badge">${countText}</span>
+              <h3>${s.name}</h3>
+              <button class="enter-btn">الدخول للمادة <span class="btn-arrow">←</span></button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // 4. التبديل بين تبويبات الصفحة الرئيسية (المواد / المحفوظات / أحدث الإضافات)
+    function switchHomeTab(tab) {
+      document.querySelectorAll(".home-tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById("subjectsView").style.display = "none";
+      document.getElementById("savedView").style.display = "none";
+      document.getElementById("recentView").style.display = "none";
+      document.getElementById("summariesView").style.display = "none";
+      document.getElementById("heroSection").style.display = "block";
+
+      if (tab === "subjects") {
+        document.getElementById("tabSubjectsBtn").classList.add("active");
+        document.getElementById("subjectsView").style.display = "block";
+      } else if (tab === "saved") {
+        document.getElementById("tabSavedBtn").classList.add("active");
+        document.getElementById("savedView").style.display = "block";
+        renderSavedSummaries();
+      } else if (tab === "recent") {
+        document.getElementById("tabRecentBtn").classList.add("active");
+        document.getElementById("recentView").style.display = "block";
+        renderRecentSummaries();
+      }
+    }
+
+    // 5. فتح مادة معينة وعرض ملخصاتها
+    async function openSubject(id, pushHistory = true) {
+      const subject = SUBJECTS.find(s => s.id === id);
+      if (!subject) return closeSubject(false);
+
+      if (pushHistory) {
+        history.pushState({ subjectId: id }, '', '#' + id);
+      }
+      currentSubjectId = id;
+      currentCategoryFilter = "all";
+
+      // إخفاء الـ Hero وقسم المواد وعرض قسم المادة
+      document.getElementById("heroSection").style.display = "none";
+      document.getElementById("subjectsView").style.display = "none";
+      document.getElementById("savedView").style.display = "none";
+      document.getElementById("recentView").style.display = "none";
+      document.getElementById("summariesView").style.display = "block";
+
+      document.getElementById("breadcrumbSubjectTitle").textContent = subject.name;
+      document.getElementById("currentSubjectTitle").textContent = `${subject.icon} ${subject.name}`;
+      document.getElementById("searchInput").value = "";
+      document.title = `${subject.name} | كلية الحاسبات والذكاء الاصطناعي`;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // تفعيل فلتر "كل المحتوى"
+      document.querySelectorAll("#categoryPills .filter-pill").forEach(p => p.classList.remove("active"));
+      if (document.querySelector("#categoryPills .filter-pill")) {
+        document.querySelector("#categoryPills .filter-pill").classList.add("active");
+      }
+
+      document.getElementById("summariesList").innerHTML = "";
+      document.getElementById("summariesState").innerHTML = `
+        <div class="summaries-grid">
+          <div class="skeleton" style="height: 190px;"></div>
+          <div class="skeleton" style="height: 190px;"></div>
+          <div class="skeleton" style="height: 190px;"></div>
+        </div>
+      `;
+      document.getElementById("summariesState").style.display = "block";
+
+      try {
+        const snapshot = await db.collection("summaries").where("subjectId", "==", id).get();
+        if (currentSubjectId !== id) return;
+
+        subjectSummaries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        subjectSummaries.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+
+        document.getElementById("currentSubjectCount").textContent = `${subjectSummaries.length} ملخص منشور`;
+        renderSummaries();
+      } catch (error) {
+        if (currentSubjectId !== id) return;
+        document.getElementById("summariesState").innerHTML = `
+          <div class="empty">
+            <span class="emoji">❌</span>
+            <p>${escapeHtml(authErrorMessage(error))}</p>
+            <button class="enter-btn" style="width:auto;padding:8px 22px;margin-top:12px" onclick="openSubject('${id}', false)">إعادة المحاولة</button>
+          </div>
+        `;
+      }
+    }
+
+    function closeSubjectBtn() {
+      if (location.hash) {
+        history.back();
+      } else {
+        closeSubject(false);
+      }
+    }
+
+    function closeSubject(pushHistory = true) {
+      if (pushHistory && location.hash) {
+        history.pushState({}, '', window.location.pathname);
+      }
+      document.getElementById("heroSection").style.display = "block";
+      document.getElementById("summariesView").style.display = "none";
+      document.getElementById("subjectsView").style.display = "block";
+      document.title = "ملخصات حاسبات والذكاء الاصطناعي | جامعة وادي النيل";
+      currentSubjectId = null;
+      subjectSummaries = [];
+      switchHomeTab('subjects');
+    }
+
+    // 6. فلترة الملخصات حسب التصنيف (ملخص، محاضرة، شيت، امتحان)
+    function filterByCategory(cat, btn) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll("#categoryPills .filter-pill").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      renderSummaries();
+    }
+
+    // 7. رسم بطاقات الملخصات داخل المادة
+    function renderSummaries() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      
+      const filtered = subjectSummaries.filter(s => {
+        const matchesQuery = !query || 
+          s.title.toLowerCase().includes(query) || 
+          (s.description && s.description.toLowerCase().includes(query));
+        
+        const matchesCategory = currentCategoryFilter === "all" ||
+          (s.category && s.category.includes(currentCategoryFilter)) ||
+          (!s.category && s.title.includes(currentCategoryFilter)) ||
+          (!s.category && s.description && s.description.includes(currentCategoryFilter));
+
+        return matchesQuery && matchesCategory;
+      });
+
+      const list = document.getElementById("summariesList");
+      const state = document.getElementById("summariesState");
+
+      if (filtered.length === 0) {
+        list.innerHTML = "";
+        state.style.display = "block";
+        state.innerHTML = query 
+          ? `<div class="empty"><span class="emoji">🔍</span><p>لم يتم العثور على أي ملخص بهذا الاسم في هذا التصنيف</p></div>` 
+          : `<div class="empty"><span class="emoji">📭</span><p>لا توجد ملخصات مضافة هنا حتى الآن</p></div>`;
+        return;
+      }
+
+      state.style.display = "none";
+      const subject = SUBJECTS.find(sub => sub.id === currentSubjectId) || { color: "var(--primary)" };
+
+      list.innerHTML = filtered.map((s, i) => buildSummaryCardHtml(s, subject, i)).join("");
+    }
+
+    // كود بطاقة الملخص الموحد
+    function buildSummaryCardHtml(s, subject, i = 0) {
+      const diffDays = s.createdAt ? (Date.now() - (s.createdAt.toMillis ? s.createdAt.toMillis() : new Date(s.createdAt).getTime())) / (1000 * 60 * 60 * 24) : 10;
+      const isNew = diffDays < 3;
+      const newBadge = isNew ? `<span class="badge" style="background: #ff4757; color: white; margin-left: 6px;">🔥 جديد</span>` : "";
+
+      const categoryLabel = s.category ? `<span class="category-tag">${escapeHtml(s.category)}</span>` : "";
+
+      const isFav = Favorites.has(s.id);
+      const favBtn = `
+        <button class="fav-btn ${isFav ? 'active' : ''}" onclick="handleToggleFav(this, '${s.id}')" title="${isFav ? 'إزالة من المحفوظات' : 'حفظ في المفضلة'}">
+          ${isFav ? '★' : '☆'}
+        </button>
+      `;
+
+      const previewBtn = isSafeUrl(s.url)
+        ? `<button class="open-btn" onclick="openPdfModal('${escapeHtml(s.title).replace(/'/g, "\\'")}', '${escapeHtml(s.url)}')">👁️ معاينة</button>`
+        : "";
+
+      const downloadLink = isSafeUrl(s.url)
+        ? `<a class="open-btn ghost-btn" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">📥 فتح الرابط</a>`
+        : "";
+
+      const shareBtn = isSafeUrl(s.url)
+        ? `<button class="open-btn ghost-btn" onclick="copyShare(this, '${escapeHtml(s.title).replace(/'/g, "\\'")}', '${escapeHtml(s.url)}')">🔗 مشاركة</button>`
+        : "";
+
+      const imageHtml = s.imageUrl && isSafeUrl(s.imageUrl) 
+        ? `<img src="${escapeHtml(s.imageUrl)}" class="summary-image" alt="غلاف الملخص" loading="lazy">` 
+        : "";
+
+      return `
+        <article class="summary-card" style="--c:${subject.color}; --c-soft:${subject.color}22; animation-delay:${Math.min(i, 8) * 0.05}s">
+          ${imageHtml}
+          <div class="summary-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div>${newBadge}${categoryLabel}</div>
+              ${favBtn}
+            </div>
+            <h3>${escapeHtml(s.title)}</h3>
+            <p>${escapeHtml(s.description || "ملخص شامل للمادة مع الشرح والتمارين.")}</p>
+            <div class="summary-meta">
+              <span>🗓️ ${formatDate(s.createdAt)}</span>
+              <div class="summary-actions-grid">
+                ${shareBtn}
+                ${downloadLink}
+                ${previewBtn}
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    // 8. التعامل مع المفضلة وحفظ الملخصات
+    function handleToggleFav(btn, id) {
+      const added = Favorites.toggle(id);
+      btn.classList.toggle("active", added);
+      btn.innerHTML = added ? "★" : "☆";
+      btn.title = added ? "إزالة من المحفوظات" : "حفظ في المفضلة";
+      toast(added ? "تم حفظ الملخص في مفضلتك ⭐" : "تمت إزالة الملخص من المفضلة", "info");
+      updateSavedCountBadge();
+
+      // لو الصفحة الحالية هي صفحة المحفوظات، نعيد رسمها
+      if (document.getElementById("savedView").style.display === "block") {
+        renderSavedSummaries();
+      }
+    }
+
+    function updateSavedCountBadge() {
+      const count = Favorites.getAll().length;
+      const el = document.getElementById("savedCount");
+      if (el) el.textContent = count;
+    }
+
+    // 9. رسم صفحة المحفوظات (المفضلة)
+    function renderSavedSummaries() {
+      const favIds = Favorites.getAll();
+      const list = document.getElementById("savedList");
+
+      if (favIds.length === 0) {
+        list.innerHTML = `
+          <div class="empty" style="grid-column: 1 / -1;">
+            <span class="emoji">⭐</span>
+            <p>لم تقم بحفظ أي ملخصات بعد. اضغط على علامة النجمة (☆) على أي ملخص لحفظه هنا.</p>
+            <button class="home-tab-btn" style="margin-top: 14px;" onclick="switchHomeTab('subjects')">تصفح المواد</button>
+          </div>
+        `;
+        return;
+      }
+
+      const savedItems = allSummariesCache.filter(s => favIds.includes(s.id));
+      if (savedItems.length === 0) {
+        list.innerHTML = `
+          <div class="empty" style="grid-column: 1 / -1;">
+            <span class="emoji">🔍</span>
+            <p>جاري تحميل الملخصات المحفوظة...</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = savedItems.map((s, i) => {
+        const sub = getSubject(s.subjectId);
+        return buildSummaryCardHtml(s, sub, i);
+      }).join("");
+    }
+
+    // 10. رسم قسم أحدث الملخصات المضافة
+    function renderRecentSummaries() {
+      const list = document.getElementById("recentList");
+      if (allSummariesCache.length === 0) {
+        list.innerHTML = `
+          <div class="empty" style="grid-column: 1 / -1;">
+            <span class="emoji">📭</span>
+            <p>لا توجد ملخصات مضافة بعد.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...allSummariesCache].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+      const topItems = sorted.slice(0, 8);
+
+      list.innerHTML = topItems.map((s, i) => {
+        const sub = getSubject(s.subjectId);
+        return buildSummaryCardHtml(s, sub, i);
+      }).join("");
+    }
+
+    // 11. مشغل PDF الداخلي (In-App PDF Modal)
+    function openPdfModal(title, url) {
+      const modal = document.getElementById("pdfModal");
+      const titleEl = document.getElementById("pdfModalTitleText");
+      const frame = document.getElementById("pdfFrame");
+      const loader = document.getElementById("pdfLoader");
+      const downloadBtn = document.getElementById("pdfDownloadBtn");
+      const externalBtn = document.getElementById("pdfExternalBtn");
+
+      titleEl.textContent = title;
+      externalBtn.href = url;
+
+      // فحص إذا كان الرابط Google Drive
+      const gDrive = parseGoogleDriveUrl(url);
+      if (gDrive) {
+        frame.src = gDrive.previewUrl;
+        downloadBtn.href = gDrive.downloadUrl;
+      } else {
+        frame.src = url;
+        downloadBtn.href = url;
+      }
+
+      loader.style.display = "flex";
+      frame.onload = () => {
+        loader.style.display = "none";
+      };
+
+      modal.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePdfModal() {
+      const modal = document.getElementById("pdfModal");
+      const frame = document.getElementById("pdfFrame");
+      modal.classList.remove("open");
+      frame.src = "";
+      document.body.style.overflow = "";
+    }
+
+    // 12. البحث الشامل الفوري (Global Search)
+    const globalSearchInput = document.getElementById("globalSearchInput");
+    const searchDropdown = document.getElementById("searchDropdown");
+    const searchDropdownList = document.getElementById("searchDropdownList");
+    const searchResultCount = document.getElementById("searchResultCount");
+
+    globalSearchInput.addEventListener("input", () => {
+      const q = globalSearchInput.value.trim().toLowerCase();
+      if (!q) {
+        searchDropdown.classList.remove("open");
+        return;
+      }
+
+      const results = allSummariesCache.filter(s => {
+        const sub = getSubject(s.subjectId);
+        return s.title.toLowerCase().includes(q) ||
+          (s.description && s.description.toLowerCase().includes(q)) ||
+          sub.name.toLowerCase().includes(q);
+      });
+
+      searchResultCount.textContent = `${results.length} نتائج`;
+      if (results.length === 0) {
+        searchDropdownList.innerHTML = `
+          <div class="search-empty-state">
+            <span>🔍 لا توجد نتائج مطابقة لـ "${escapeHtml(q)}"</span>
+          </div>
+        `;
+      } else {
+        searchDropdownList.innerHTML = results.slice(0, 10).map(s => {
+          const sub = getSubject(s.subjectId);
+          return `
+            <div class="search-item" onclick="handleSearchResultClick('${s.subjectId}', '${s.id}')">
+              <div class="search-item-info">
+                <span class="search-item-title">${escapeHtml(s.title)}</span>
+                <span class="search-item-meta">
+                  <span>${sub.icon} ${sub.name}</span>
+                  <span>•</span>
+                  <span>🗓️ ${formatDate(s.createdAt)}</span>
+                </span>
+              </div>
+              <span class="search-item-badge" style="background: ${sub.color};">فتح</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      searchDropdown.classList.add("open");
+    });
+
+    function handleSearchResultClick(subjectId, summaryId) {
+      searchDropdown.classList.remove("open");
+      globalSearchInput.value = "";
+      openSubject(subjectId, true);
+    }
+
+    // إغلاق دروبداون البحث عند النقر في أي مكان آخر
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-wrapper")) {
+        searchDropdown.classList.remove("open");
+      }
+    });
+
+    // 13. زر نسخ ومشاركة الملخص
+    function copyShare(btn, title, url) {
+      const text = `📥 مادة: ${title}\n🔗 الرابط: ${url}\n\n🎓 منصة كلية الحاسبات والذكاء الاصطناعي - جامعة وادي النيل`;
+      navigator.clipboard.writeText(text).then(() => {
+        toast("تم نسخ رابط الملخص بنجاح!", "success");
+        const rect = btn.getBoundingClientRect();
+        fireConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = "✅ تم النسخ";
+        btn.style.color = "var(--success)";
+        btn.style.borderColor = "var(--success)";
+        setTimeout(() => {
+          btn.innerHTML = oldHtml;
+          btn.style.color = "";
+          btn.style.borderColor = "";
+        }, 2000);
+      }).catch(() => {
+        toast("فشل النسخ تلقائياً", "error");
+      });
+    }
+
+    // 14. اختصارات لوحة المفاتيح
+    document.addEventListener("keydown", (e) => {
+      // Esc للخروج من المعاينة أو العودة من المادة
+      if (e.key === "Escape") {
+        const modal = document.getElementById("pdfModal");
+        if (modal.classList.contains("open")) {
+          closePdfModal();
+          return;
+        }
+        if (searchDropdown.classList.contains("open")) {
+          searchDropdown.classList.remove("open");
+          return;
+        }
+        if (currentSubjectId) {
+          closeSubjectBtn();
+        }
+      }
+
+      // Ctrl + K أو / للتركيز على البحث
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") || (e.key === "/" && document.activeElement.tagName !== "INPUT")) {
+        e.preventDefault();
+        if (currentSubjectId) {
+          const inSearch = document.getElementById("searchInput");
+          if (inSearch) inSearch.focus();
+        } else {
+          globalSearchInput.focus();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
+    });
+
+    // 15. السكرول بار والزر العائم للرجوع
+    const circle = document.querySelector('.progress-ring__circle');
+    const radius = circle ? circle.r.baseVal.value : 0;
+    const circumference = radius * 2 * Math.PI;
+    if (circle) {
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      circle.style.strokeDashoffset = circumference;
+    }
+
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) : 0;
+
+      const bar = document.getElementById("scrollProgress");
+      if (bar) bar.style.width = (scrolled * 100) + "%";
+
+      const backBtn = document.getElementById('floatingBackBtn');
+      if (backBtn && currentSubjectId) {
+        if (winScroll > 150) backBtn.classList.add('show');
+        else backBtn.classList.remove('show');
+
+        if (circle) {
+          const offset = circumference - scrolled * circumference;
+          circle.style.strokeDashoffset = offset;
+        }
+      } else if (backBtn) {
+        backBtn.classList.remove('show');
+      }
+    });
+
+    // 16. تأثير الكونفيتي
+    window.fireConfetti = function(x, y) {
+      for (let i = 0; i < 18; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'mini-confetti';
+        conf.style.left = x + 'px';
+        conf.style.top = y + 'px';
+        conf.style.backgroundColor = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ff6b81', '#a29bfe'][Math.floor(Math.random()*6)];
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 35 + Math.random() * 55;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity - 35;
+
+        conf.style.setProperty('--tx', tx + 'px');
+        conf.style.setProperty('--ty', ty + 'px');
+
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 850);
+      }
+    };
+
+    // 17. تأثير التموج عند النقر
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('button, a, input, select, textarea, .subject-card, .summary-card')) return;
+      const ripple = document.createElement('div');
+      ripple.className = 'page-ripple';
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+
+    // 18. إمالة البطاقات ثلاثية الأبعاد (3D Parallax & Glare)
+    document.addEventListener('mousemove', (e) => {
+      document.documentElement.style.setProperty('--px', e.clientX + 'px');
+      document.documentElement.style.setProperty('--py', e.clientY + 'px');
+
+      const target = e.target.closest('.subject-card, .summary-card');
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      target.style.setProperty('--mouse-x', x + 'px');
+      target.style.setProperty('--mouse-y', y + 'px');
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+
+      target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target.closest('.subject-card, .summary-card');
+      if (target && !target.contains(e.relatedTarget)) {
+        target.style.transform = '';
+      }
+    });
+
+    // تبديل المظهر بالنقر للموبايل
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeDropdown = document.getElementById("themeDropdown");
+    if (themeToggleBtn && themeDropdown) {
+      themeToggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        themeDropdown.classList.toggle("open");
+      });
+      document.addEventListener("click", () => themeDropdown.classList.remove("open"));
+    }
+
+    document.getElementById("searchInput").addEventListener("input", renderSummaries);
+
+    // التعامل مع تاريخ المتصفح
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.subjectId) {
+        openSubject(e.state.subjectId, false);
+      } else {
+        closeSubject(false);
+      }
+    });
+    // PWA Installation Logic
+    let deferredPrompt;
+    const installAppBtn = document.getElementById('installAppBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      // Update UI notify the user they can install the PWA
+      installAppBtn.style.display = 'flex';
+    });
+
+    installAppBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        try {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
+          installAppBtn.style.display = 'none';
+        } catch (err) {
+          console.error("PWA Prompt Error:", err);
+          alert("تلميح: إذا لم تظهر نافذة التثبيت، ابحث عن أيقونة التثبيت 🖥️ أو 📱 في شريط الرابط (العنوان) بالأعلى واضغط عليها.");
+        }
+      } else {
+        alert("يبدو أن التطبيق مثبت بالفعل، أو أن المتصفح قد أغلق النافذة. تفقد شريط العنوان (URL) واضغط على علامة التثبيت.");
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      // Hide the app-provided install promotion
+      installAppBtn.style.display = 'none';
+      toast("تم تثبيت التطبيق بنجاح! 🎉", "success");
+    });
+
+    // تسجيل الخدمة (Service Worker) لتطبيق الموبايل PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.log('Service Worker Error', err));
+      });
+    }
+  </script>
+</body>
+</html>
