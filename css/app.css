@@ -535,10 +535,29 @@ footer {
   .panel.sticky { position: static; }
 }
 @media (max-width: 640px) {
-  .navbar { padding: 10px 4%; }
-  .nav-brand small, #userName { display: none; }
-  .nav-btn { padding: 7px 12px; font-size: 0.82rem; }
-  .subjects-grid { grid-template-columns: repeat(2, 1fr); }
+  .navbar { padding: 10px 4%; flex-wrap: wrap; justify-content: space-between; }
+  .nav-brand strong { font-size: 1rem; }
+  .nav-brand small, #welcomeText { display: none; }
+  .nav-btn { padding: 7px 10px; font-size: 0.8rem; }
+  
+  .subjects-grid, .summaries-grid { grid-template-columns: 1fr; gap: 12px; }
+  
+  /* Sleek Horizontal Cards for Mobile */
+  .subject-card { flex-direction: row; align-items: center; border-radius: 16px; padding: 10px; min-height: 100px; text-align: right; }
+  .subject-cover { width: 85px; height: 85px; padding: 0; border-radius: 12px !important; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .subject-cover::after { display: none; }
+  .subject-cover .icon { font-size: 2.8rem; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.15)); }
+  .subject-card:hover .icon { transform: scale(1.1); }
+  
+  .subject-info { padding: 5px 15px; display: flex; flex-direction: column; justify-content: center; flex: 1; }
+  .subject-count-badge { align-self: flex-start; margin-bottom: 6px; font-size: 0.75rem; padding: 4px 10px; }
+  .subject-info h3 { font-size: 1.1rem; margin-bottom: 0; }
+  .enter-btn { display: none; } /* Hidden on mobile to save space, whole card is clickable */
+  
+  /* Chatbot Mobile Fixes */
+  .chat-fab { width: 50px; height: 50px; bottom: 20px; left: 15px; }
+  .chat-fab svg { width: 24px; height: 24px; }
+  .chat-widget { bottom: 85px; left: 15px; width: calc(100vw - 30px); max-width: none; max-height: 450px; }
 }
 
 
@@ -2039,4 +2058,19 @@ html[data-theme="navy"] .bg-watermark {
 /* Adjust Admin Fab position to not overlap with chat */
 .admin-fab {
   bottom: 100px;
+}
+.install-btn {
+  background: var(--primary);
+  color: #fff !important;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.install-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
