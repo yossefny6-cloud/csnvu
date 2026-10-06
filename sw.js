@@ -1,12 +1,12 @@
-const CACHE_NAME = 'cs-ai-cache-v15';
+const CACHE_NAME = 'cs-ai-cache-v17';
 const urlsToCache = [
   '/',
   '/index.html',
   '/login.html',
   '/register.html',
-  '/css/base.css?v=11.0',
-  '/css/app.css?v=11.0',
-  '/css/auth.css?v=11.0',
+  '/css/base.css?v=13.0',
+  '/css/app.css?v=13.0',
+  '/css/auth.css?v=13.0',
   '/js/common.js',
   '/js/subjects.js',
   '/js/chat.js?v=2.7',

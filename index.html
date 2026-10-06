@@ -317,9 +317,10 @@
       <div class="pdf-modal-body">
         <div class="pdf-modal-loader" id="pdfLoader">
           <div class="loader-ring"></div>
-          <span style="color: var(--muted); font-size: 0.95rem;">جاري تحميل المستند...</span>
+          <span style="color: var(--muted); font-size: 0.95rem;">جاري التحميل...</span>
         </div>
         <iframe class="pdf-modal-iframe" id="pdfFrame" src="" allowfullscreen></iframe>
+        <video class="pdf-modal-iframe" id="videoFrame" src="" controls controlsList="nodownload" style="display:none; background: #000; width: 100%; height: 100%;"></video>
       </div>
     </div>
   </div>
@@ -643,7 +644,7 @@
       `;
 
       const previewBtn = isSafeUrl(s.url)
-        ? `<button class="open-btn" onclick="openPdfModal('${escapeHtml(s.title).replace(/'/g, "\\'")}', '${escapeHtml(s.url)}')">👁️ معاينة</button>`
+        ? `<button class="open-btn" onclick="openPdfModal('${escapeHtml(s.title).replace(/'/g, "\\'")}', '${escapeHtml(s.url)}', '${s.fileType || 'document'}')">👁️ معاينة</button>`
         : "";
 
       const downloadLink = isSafeUrl(s.url)
@@ -757,32 +758,56 @@
       }).join("");
     }
 
-    // 11. مشغل PDF الداخلي (In-App PDF Modal)
-    function openPdfModal(title, url) {
+    // 11. مشغل داخلي (In-App Modal)
+    function openPdfModal(title, url, fileType = 'document') {
       const modal = document.getElementById("pdfModal");
       const titleEl = document.getElementById("pdfModalTitleText");
       const frame = document.getElementById("pdfFrame");
+      const videoFrame = document.getElementById("videoFrame");
       const loader = document.getElementById("pdfLoader");
       const downloadBtn = document.getElementById("pdfDownloadBtn");
       const externalBtn = document.getElementById("pdfExternalBtn");
 
       titleEl.textContent = title;
       externalBtn.href = url;
+      downloadBtn.href = url;
 
-      // فحص إذا كان الرابط Google Drive
-      const gDrive = parseGoogleDriveUrl(url);
-      if (gDrive) {
-        frame.src = gDrive.previewUrl;
-        downloadBtn.href = gDrive.downloadUrl;
-      } else {
-        frame.src = url;
-        downloadBtn.href = url;
-      }
-
-      loader.style.display = "flex";
-      frame.onload = () => {
+      if (fileType === 'video') {
+        frame.style.display = "none";
+        videoFrame.style.display = "block";
+        videoFrame.src = url;
         loader.style.display = "none";
-      };
+      } else if (fileType === 'youtube') {
+        videoFrame.style.display = "none";
+        frame.style.display = "block";
+        
+        let embedUrl = url;
+        const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+        if (ytMatch && ytMatch[1]) {
+          embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+        
+        frame.src = embedUrl;
+        loader.style.display = "flex";
+        frame.onload = () => { loader.style.display = "none"; };
+      } else {
+        videoFrame.style.display = "none";
+        frame.style.display = "block";
+        
+        // فحص إذا كان الرابط Google Drive
+        const gDrive = parseGoogleDriveUrl(url);
+        if (gDrive) {
+          frame.src = gDrive.previewUrl;
+          downloadBtn.href = gDrive.downloadUrl;
+        } else {
+          frame.src = url;
+        }
+
+        loader.style.display = "flex";
+        frame.onload = () => {
+          loader.style.display = "none";
+        };
+      }
 
       modal.classList.add("open");
       document.body.style.overflow = "hidden";
@@ -791,8 +816,10 @@
     function closePdfModal() {
       const modal = document.getElementById("pdfModal");
       const frame = document.getElementById("pdfFrame");
+      const videoFrame = document.getElementById("videoFrame");
       modal.classList.remove("open");
       frame.src = "";
+      videoFrame.src = ""; // Stop video playback
       document.body.style.overflow = "";
     }
 

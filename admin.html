@@ -281,10 +281,17 @@
           </div>
 
           <div class="form-group">
-            <label for="url">رابط الملف أو الملخص (PDF / Google Drive)</label>
-            <input type="url" id="url" dir="ltr" placeholder="https://drive.google.com/..." required />
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-              <small class="hint">ارفع الملف على Google Drive واجعله "Anyone with the link"</small>
+            <label for="pdfFile">ارفع ملف (PDF، صور، أو فيديوهات MP4)</label>
+            <input type="file" id="pdfFile" accept=".pdf,.doc,.docx,.jpg,.png,.mp4,.webm" />
+            <input type="url" id="url" dir="ltr" placeholder="أو أدخل رابط خارجي هنا (اختياري)" style="margin-top: 8px;" />
+            <div id="uploadProgressContainer" style="display:none; margin-top: 10px;">
+              <div style="background: var(--border); border-radius: 10px; height: 8px; overflow: hidden; width: 100%;">
+                <div id="uploadProgressBar" style="background: var(--primary); width: 0%; height: 100%; transition: width 0.3s;"></div>
+              </div>
+              <small id="uploadProgressText" style="color: var(--primary); display: block; margin-top: 4px; font-weight: bold;">0% جاري الرفع...</small>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <small class="hint">اختر ملفاً من جهازك، أو ضع رابطاً جاهزاً بالأسفل.</small>
               <button type="button" class="link-test-btn" onclick="testCurrentUrl()">🔍 فحص الرابط</button>
             </div>
           </div>
@@ -390,6 +397,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/common.js"></script>
   <script src="js/subjects.js"></script>
@@ -595,26 +603,61 @@
       const titleVal = $("title").value.trim();
       const subjectVal = $("subject").value;
       const categoryVal = $("category").value;
-      const urlVal = $("url").value.trim();
+      let urlVal = $("url").value.trim();
       const imageUrlVal = $("imageUrl").value.trim();
       const descVal = $("description").value.trim();
+      const pdfFile = $("pdfFile").files[0];
 
       if (titleVal.length < 3) return toast("يرجى كتابة عنوان واضح للملخص (3 أحرف على الأقل)", "error");
       if (!subjectVal) return toast("يرجى اختيار المادة المقررة", "error");
-      if (!isSafeUrl(urlVal)) return toast("رابط الملخص يجب أن يبدأ بـ https://", "error");
+      if (!pdfFile && !isSafeUrl(urlVal)) return toast("يرجى إرفاق ملف أو إدخال رابط يبدأ بـ https://", "error");
       if (imageUrlVal && !isSafeUrl(imageUrlVal)) return toast("رابط الصورة يجب أن يبدأ بـ https://", "error");
-
-      const data = {
-        title: titleVal,
-        subjectId: subjectVal,
-        category: categoryVal,
-        url: urlVal,
-        imageUrl: imageUrlVal,
-        description: descVal,
-      };
 
       saveBtn.disabled = true;
       try {
+        // Upload file if selected
+        if (pdfFile) {
+          if (!storage) throw new Error("خدمة التخزين (Firebase Storage) غير متوفرة.");
+          $("uploadProgressContainer").style.display = "block";
+          const fileRef = storage.ref(`summaries/${Date.now()}_${pdfFile.name}`);
+          const uploadTask = fileRef.put(pdfFile);
+          
+          await new Promise((resolve, reject) => {
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                $("uploadProgressBar").style.width = progress + "%";
+                $("uploadProgressText").textContent = Math.round(progress) + "% جاري الرفع...";
+              }, 
+              (error) => reject(error), 
+              async () => {
+                urlVal = await uploadTask.snapshot.ref.getDownloadURL();
+                $("uploadProgressText").textContent = "تم الرفع بنجاح ✔";
+                resolve();
+              }
+            );
+          });
+        }
+
+        let fileType = "link";
+        if (pdfFile) {
+          fileType = pdfFile.type.startsWith("video/") ? "video" : "document";
+        } else if (urlVal.includes("youtube.com") || urlVal.includes("youtu.be")) {
+          fileType = "youtube";
+        } else if (urlVal.endsWith(".mp4") || urlVal.endsWith(".webm")) {
+          fileType = "video";
+        }
+
+        const data = {
+          title: titleVal,
+          subjectId: subjectVal,
+          category: categoryVal,
+          url: urlVal,
+          imageUrl: imageUrlVal,
+          description: descVal,
+          fileType: fileType,
+        };
+
         const ts = firebase.firestore.FieldValue.serverTimestamp();
         if (editingId) {
           await db.collection("summaries").doc(editingId).update({ ...data, updatedAt: ts });
@@ -628,10 +671,15 @@
           });
           toast("تم نشر الملخص للطلاب بنجاح 🎉", "success");
         }
+        
+        $("pdfFile").value = "";
+        $("uploadProgressContainer").style.display = "none";
+        $("uploadProgressBar").style.width = "0%";
         resetForm();
         await loadSummaries();
       } catch (err) {
         toast(authErrorMessage(err), "error");
+        $("uploadProgressContainer").style.display = "none";
       } finally {
         saveBtn.disabled = false;
       }

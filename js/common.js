@@ -13,6 +13,7 @@ const isFirebaseConfigured =
 
 let auth = null;
 let db = null;
+let storage = null;
 
 if (isFirebaseConfigured) {
   if (!firebase.apps.length) {
@@ -20,6 +21,10 @@ if (isFirebaseConfigured) {
   }
   auth = firebase.auth();
   db = firebase.firestore();
+  
+  if (firebase.storage) {
+    storage = firebase.storage();
+  }
 
   // تفعيل الكاش التلقائي للعمل حتى عند بطء الإنترنت
   try {
