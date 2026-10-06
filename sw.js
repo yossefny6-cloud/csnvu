@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cs-ai-cache-v11';
+const CACHE_NAME = 'cs-ai-cache-v12';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -43,38 +43,43 @@ self.addEventListener('activate', (event) => {
 
 // 3. Fetch from Cache or Network
 self.addEventListener('fetch', (event) => {
-  // لا نتدخل في طلبات قاعدة البيانات والـ API
-  if (event.request.url.includes('firestore.googleapis.com') || 
-      event.request.url.includes('generativelanguage.googleapis.com') ||
-      event.request.url.includes('wa.me')) {
+  // Only cache GET requests. Ignore POST, PUT, DELETE (like Firebase Auth)
+  if (event.request.method !== 'GET') return;
+
+  // Ignore API and external requests to prevent CORS issues
+  if (event.request.url.includes('googleapis.com') || 
+      event.request.url.includes('wa.me') ||
+      event.request.url.includes('firestore')) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // Return cached response if found
-        if (response) {
-          return response;
+      .then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse; // Return from cache if found
         }
-        return fetch(event.request).then(
-          (response) => {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone response to cache it dynamically
-            var responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
+        
+        return fetch(event.request).then((networkResponse) => {
+          // Check if response is valid for caching
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
           }
-        );
+
+          // Cache the new resource
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+
+          return networkResponse;
+        }).catch((err) => {
+          // If offline and resource not in cache, fallback to index.html for navigation
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+          throw err;
+        });
       })
   );
 });
